@@ -66,3 +66,15 @@ class Maze:
             self.grid[y][x - 1].E = False
         else:
             raise MazeError(f"Invalid Direction {direction}")
+        
+    def walls_count(self, x: int, y: int) -> int:
+        count: int = 0
+        if not self.grid[y][x].N:
+            count += 1
+        if not self.grid[y][x].E:
+            count += 1
+        if not self.grid[y][x].S:
+            count += 1
+        if not self.grid[y][x].W:
+            count += 1
+        return count
