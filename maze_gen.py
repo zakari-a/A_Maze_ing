@@ -12,7 +12,10 @@ class MazeGenerator():
 
     def generate(self, entry: tuple, exit_: tuple, perfect: bool) -> Maze:
         maze = Maze(self.width, self.height)
-        self._apply_pattern(maze, entry, exit_)
+        try:
+            self._apply_pattern(maze, entry, exit_)
+        except Pattern42Error as e:
+            print(e)
         self._carve(maze, entry, exit_, perfect)
         
         return maze
@@ -96,7 +99,7 @@ class MazeGenerator():
 
         if not perfect:
             deads = self._dead_ends(maze)
-            total = int(len(deads) * 0.25)
+            total = int(len(deads) * 0.50)
             for _ in range(total):
                 x, y = random.choice(deads)
                 deads.remove((x, y))
