@@ -31,7 +31,7 @@ def print_maze(maze, path=None):
 
     path_set = set(path) if path else set()
 
-    print("+" + "---+" * w)
+    print("+" + "--+" * w)
     for y in range(h):
         row = "|"
         for x in range(w):
@@ -40,7 +40,7 @@ def print_maze(maze, path=None):
             if (x, y) in path_set:
                 row += f" X "
             else:
-                row += "   "
+                row += "  "
 
             if x == w - 1:
                 row += "|"

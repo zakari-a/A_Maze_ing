@@ -94,7 +94,8 @@ class MazeGenerator():
             
             direction, nx, ny = random.choice(unvisited)
             maze.remove_wall(x, y, direction)
-            maze.grid[ny][nx].visited = True
+            maze.grid[ny][nx].visited = True# draw_maze(saved, maze)
+
             stack.append((nx, ny))
 
         if not perfect:
