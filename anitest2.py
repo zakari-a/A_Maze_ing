@@ -1,6 +1,5 @@
 from mlx import Mlx
 from errors import MazeError
-from maze import Maze
 from maze_gen import MazeGenerator
 from config_parser import final_parse
 import random
@@ -29,7 +28,7 @@ ctx = mlx.mlx_init()
 win_w = maze.width * CELL 
 win_h = maze.height * CELL
 
-win = mlx.mlx_new_window(ctx, win_w, win_h, "Maze")
+win = mlx.mlx_new_window(ctx, win_w, win_h + 40, "Maze")
 
 pattern_img_result = mlx.mlx_xpm_file_to_image(ctx, "notgrey.xpm")
 pattern_img = pattern_img_result[0] 
@@ -67,48 +66,128 @@ def clear(color=0x000000):
             put_pixel(x, y, color)
 
 
+def neighbors(maze, x:int, y:int) -> list:
+        cells = []
+        if maze.in_bounds(x, y-1):
+            cells.append((x, y-1))
+        if maze.in_bounds(x+1, y):
+            cells.append((x+1, y))
+        if maze.in_bounds(x, y+1):
+            cells.append((x, y+1))
+        if maze.in_bounds(x-1, y):
+            cells.append((x-1, y))
+        return cells
+
+def neighbors_cells(maze):
+    visited = set()
+    x = maze.width // 2
+    y = maze.height // 2
+    visited.add((x, y))
+    cells = []
+    cells.append([(x, y)])
+    cells.append(neighbors(maze, x, y))
+    for n in cells[1]:
+        visited.add(n)
+    i = 1
+    while cells[i] and i < len(cells):
+        cell = []
+        for n in cells[i]:
+            neigh = neighbors(maze, n[0], n[1])
+            for k in neigh:
+                if k not in visited:
+                    cell.append(k)
+                    visited.add(k)
+        cells.append(cell)
+        i += 1
+    return cells
+
+maze_index = 0
+maze_animating = True
+cells = neighbors_cells(maze)
+
+def animate_maze(_):
+    global maze_index, maze_animating, saved, cells
+
+    if not maze_animating:
+        return 0
+
+    if maze_index < len(cells):
+        c = cells[maze_index]
+        for k in c:
+            x, y = k
+            cell = maze.grid[y][x]
+            x *= CELL
+            y *= CELL
+            n = 2
+            if cell.N:
+                for i in range(n + 1):
+                    hline(x - n , x + CELL + n, y + i, saved)
+            if cell.S:
+                for i in range(n + 1):
+                    hline(x - n, x + CELL + n, y + CELL - i, saved)
+
+            if cell.W:
+                for i in range(n):
+                    vline(x + i, y - n, y + CELL, saved)
+
+            if cell.E:
+                for i in range(n + 1):
+                    vline(x + CELL - i, y - n, y + CELL, saved)
+        time.sleep(0.01)
+        mlx.mlx_put_image_to_window(ctx, win, img, 0, 0)
+        maze_index += 1
+    else:
+        maze_animating = False
+        ex, ey = path[0]
+        ox, oy = path[-1]
+        ex *= CELL
+        ey *= CELL
+        ox *= CELL
+        oy *= CELL
+
+        for y in range(4, CELL - 4):
+            for x in range(4, CELL - 4):
+                if saved == 0x00FF00:
+                    put_pixel(ex + x, ey + y, 0xFFFF00)
+                else:
+                    put_pixel(ex + x, ey + y, 0x00FF00)
+            
+        for y in range(4, CELL - 4):
+            for x in range(4, CELL - 4):
+                if saved == 0xFF0000:
+                    put_pixel(ox + x, oy + y, 0xFF00FF)
+                else:
+                    put_pixel(ox + x, oy + y, 0xFF0000)
+    return 0
+        
+
 def animate_pattern(_):
     global is_animating, animation_index, saved
 
     if not is_animating:
         return 0
+    
     patt = pattern_coords(maze)
     for _ in range(1):
         if animation_index < len(patt):
             x, y = patt[animation_index]
             x *= CELL
             y *= CELL
-            # cell = maze.grid[y][x]
-            # n = 2
-            # if cell.N:
-            #     for i in range(n + 1):
-            #         hline(px - n , px + CELL + n, py + i, saved)
-            # if cell.S:
-            #     for i in range(n + 1):
-            #         hline(px - n, px + CELL + n, py + CELL - i, saved)
 
-            # if cell.W:
-            #     for i in range(n):
-            #         vline(px + i, py - n, py + CELL, saved)
-
-            # if cell.E:
-            #     for i in range(n + 1):
-            #         vline(px + CELL - i, py - n, py + CELL, saved)
             for ny in range(-1, CELL + 2):
                 for nx in range(-1, CELL + 2):
                     if saved == 0xFFFFFF:
                         put_pixel(x + nx, y + ny, 0x000000)
                     else:
                         put_pixel(x + nx, y + ny, 0xFFFFFF)
-            time.sleep(0.01)
             mlx.mlx_put_image_to_window(ctx, win, img, 0, 0)
+            # time.sleep(0.05)
             animation_index += 1
         else:
             is_animating = False
             break
             
     return 0
-
 
 def animate_path(_):
     global is_animating_path, path_animation_index
@@ -242,34 +321,42 @@ def draw_path(path, color=0xFFFFFF):
                 put_pixel(px + dx, py + dy, color)
     mlx.mlx_put_image_to_window(ctx, win, img, 0, 0)
 
+def print_keys(keys):
+    y = win_h + 10
+    x = 40
+    for key in keys:
+        mlx.mlx_string_put(ctx, win, x, y, 0xFFFFFF, key)
+        x += 200
 
 colors = [0xFFFFFF, 0xFF0000, 0x00FF00, 0x0000FF, 0xFFFF00, 0x00FFFF, 0xFF00FF]
+strings = ["'1' : Regen", "'2' : Path", "'3' : Color","'4' : Quit"]
 saved = random.choice(colors)
 
 path_color = colors[0]
 clear(0x000000)
 cleared_buffer = bytes(data)
-draw_maze(saved, maze, path)
 
 is_animating = True
 animation_index = 0
-
+print_keys(strings)
 p = True
 
 show_path = False
 is_animating_path = False
-path_animation_index = 2
+path_animation_index = 1
 
 i = 0
 def on_key(keycode, _):
     global saved
     global path
-    global maze, i
+    global maze, i, maze_index, maze_animating
     global is_animating, animation_index
-    if keycode == 65307:
+    if keycode == 52:
         mlx.mlx_loop_exit(ctx)
     
-    elif keycode == 99:
+    elif keycode == 51:
+        if maze_animating:
+            return
         saved = colors[i % len(colors)]
         draw_maze(saved, maze, path)
         i += 1
@@ -277,9 +364,9 @@ def on_key(keycode, _):
         is_animating = True
 
 
-    elif keycode == 115:
+    elif keycode == 50:
         global show_path, is_animating_path, path_animation_index
-        if is_animating_path:
+        if is_animating_path or is_animating:
             return
         
         if not show_path:
@@ -293,16 +380,17 @@ def on_key(keycode, _):
             animation_index = 0
             is_animating = True
 
-    elif keycode == 103:
+    elif keycode == 49:
 
-        if is_animating_path:
+        if is_animating_path or is_animating:
             return
-        
+          
         maze = gen.generate(configs.entry, configs.exit, configs.perfect)
         path = DFS_algo(maze, configs.entry, configs.exit)
         show_path = False
         data[:] = cleared_buffer
-        draw_maze(saved, maze, path)
+        maze_animating = True
+        maze_index = 0
         animation_index = 0
         is_animating = True
 
@@ -323,7 +411,9 @@ def on_key(keycode, _):
             
 
 def animation_loop(_):
-    animate_pattern(_)
+    animate_maze(_)
+    if not maze_animating:
+        animate_pattern(_)
     animate_path(_)
     darw_pattern(_)
     return 0

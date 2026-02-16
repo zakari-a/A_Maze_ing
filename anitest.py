@@ -110,52 +110,78 @@ def animate_pattern(_):
     return 0
 
 
-def animate_path(_):
-    global is_animating_path, path_animation_index
-    global path, path_color
+def animate_path(pl_coords, ppl_coords):
 
-    if not is_animating_path:
-        return 0
-    if path_animation_index  < len(path) - 2: 
-        x1, y1 = path[path_animation_index + 1]
-        px = x1 * CELL
-        py = y1 * CELL
-        for dy in range(8, CELL - 8):
-            for dx in range(8, CELL - 8):
-                put_pixel(px + dx, py + dy, path_color)
-    
-        if path_animation_index  < len(path):
-            x2, y2 = path[path_animation_index]
-            c1_x = x1 * CELL + CELL // 2
-            c1_y = y1 * CELL + CELL // 2
-            c2_x = x2 * CELL + CELL // 2
-            c2_y = y2 * CELL + CELL // 2
+    x1, y1 = ppl_coords
+    px = x1 * CELL
+    py = y1 * CELL
+    for dy in range(8, CELL - 8):
+        for dx in range(8, CELL - 8):
+            put_pixel(px + dx, py + dy, path_color)
+    # x2, y2 = ppl_coords
+    # c1_x = x1 * CELL + CELL // 2
+    # c1_y = y1 * CELL + CELL // 2
+    # c2_x = x2 * CELL + CELL // 2
+    # c2_y = y2 * CELL + CELL // 2
 
-            if c1_x == c2_x:
-                start_x = x1 * CELL + 8
-                end_x = x1 * CELL + CELL - 8
-                
-                start_y = min(y1 * CELL + 8, y2 * CELL + 8)
-                end_y = max(y1 * CELL + CELL - 8, y2 * CELL + CELL - 8)
-                for y in range(start_y, end_y):
-                    for x in range(start_x, end_x):
-                        put_pixel(x, y, path_color)
+    # if c1_x == c2_x:
+    #     start_x = x1 * CELL + 8
+    #     end_x = x1 * CELL + CELL - 8
 
-            elif c1_y == c2_y:
-                start_y = y1 * CELL + 8
-                end_y = y1 * CELL + CELL - 8
-                
-                start_x = min(x1 * CELL + 8, x2 * CELL + 8)
-                end_x = max(x1 * CELL + CELL - 8, x2 * CELL + CELL - 8)
-                for y in range(start_y, end_y):
-                    for x in range(start_x, end_x):
-                            put_pixel(x, y, path_color)
+    #     start_y = min(y1 * CELL + 8, y2 * CELL + 8)
+    #     end_y = max(y1 * CELL + CELL - 8, y2 * CELL + CELL - 8)
+    #     for y in range(start_y, end_y):
+    #         for x in range(start_x, end_x):
+    #             put_pixel(x, y, 0xFF0000)
 
-        mlx.mlx_put_image_to_window(ctx, win, img, 0, 0)
-        path_animation_index += 1 
+    # elif c1_y == c2_y:
+    #     start_y = y1 * CELL + 8
+    #     end_y = y1 * CELL + CELL - 8
 
-    else:
-        is_animating_path = False
+    #     start_x = min(x1 * CELL + 8, x2 * CELL + 8)
+    #     end_x = max(x1 * CELL + CELL - 8, x2 * CELL + CELL - 8)
+    #     for y in range(start_y, end_y):
+    #         for x in range(start_x, end_x):
+    #                 put_pixel(x, y, 0x000000)
+
+    mlx.mlx_put_image_to_window(ctx, win, img, 0, 0)
+
+
+    x1, y1 = pl_coords
+    px = x1 * CELL
+    py = y1 * CELL
+    for dy in range(8, CELL - 8):
+        for dx in range(8, CELL - 8):
+            put_pixel(px + dx, py + dy, path_color)
+
+    x2, y2 = ppl_coords
+    c1_x = x1 * CELL + CELL // 2
+    c1_y = y1 * CELL + CELL // 2
+    c2_x = x2 * CELL + CELL // 2
+    c2_y = y2 * CELL + CELL // 2
+
+    if c1_x == c2_x:
+        start_x = x1 * CELL + 8
+        end_x = x1 * CELL + CELL - 8
+
+        start_y = min(y1 * CELL + 8, y2 * CELL + 8)
+        end_y = max(y1 * CELL + CELL - 8, y2 * CELL + CELL - 8)
+        for y in range(start_y, end_y):
+            for x in range(start_x, end_x):
+                put_pixel(x, y, path_color)
+
+    elif c1_y == c2_y:
+        start_y = y1 * CELL + 8
+        end_y = y1 * CELL + CELL - 8
+
+        start_x = min(x1 * CELL + 8, x2 * CELL + 8)
+        end_x = max(x1 * CELL + CELL - 8, x2 * CELL + CELL - 8)
+        for y in range(start_y, end_y):
+            for x in range(start_x, end_x):
+                    put_pixel(x, y, path_color)
+
+    mlx.mlx_put_image_to_window(ctx, win, img, 0, 0)
+
     return 0
 
 def pattern_coords(maze):
@@ -251,12 +277,28 @@ clear(0x000000)
 cleared_buffer = bytes(data)
 draw_maze(saved, maze, path)
 
+player_x, player_y = path[1]
+prev_coords = path[0]
 is_animating = True
 animation_index = 0
 
 p = True
 
-show_path = False
+show_path = False    # elif keycode == 115:
+    #     global show_path, is_animating_path, path_animation_index
+    #     if is_animating_path:
+    #         return
+        
+    #     if not show_path:
+    #         path_animation_index = 1
+    #         is_animating_path = True
+    #         show_path = True
+    #     else:
+    #         data[:] = cleared_buffer
+    #         draw_maze(saved, maze, path)
+    #         show_path = False
+    #         animation_index = 0
+    #         is_animating = True
 is_animating_path = False
 path_animation_index = 2
 
@@ -266,6 +308,7 @@ def on_key(keycode, _):
     global path
     global maze, i
     global is_animating, animation_index
+    global player_x, player_y, prev_coords
     if keycode == 65307:
         mlx.mlx_loop_exit(ctx)
     
@@ -277,21 +320,21 @@ def on_key(keycode, _):
         is_animating = True
 
 
-    elif keycode == 115:
-        global show_path, is_animating_path, path_animation_index
-        if is_animating_path:
-            return
+    # elif keycode == 115:
+    #     global show_path, is_animating_path, path_animation_index
+    #     if is_animating_path:
+    #         return
         
-        if not show_path:
-            path_animation_index = 1
-            is_animating_path = True
-            show_path = True
-        else:
-            data[:] = cleared_buffer
-            draw_maze(saved, maze, path)
-            show_path = False
-            animation_index = 0
-            is_animating = True
+    #     if not show_path:
+    #         path_animation_index = 1
+    #         is_animating_path = True
+    #         show_path = True
+    #     else:
+    #         data[:] = cleared_buffer
+    #         draw_maze(saved, maze, path)
+    #         show_path = False
+    #         animation_index = 0
+    #         is_animating = True
 
     elif keycode == 103:
 
@@ -321,10 +364,37 @@ def on_key(keycode, _):
             animation_index = 0
             is_animating = True
             
+    elif keycode == 65362:
+        if not maze.grid[player_y][player_x].N:
+            prev_coords = ((player_x, player_y))
+            player_y -= 1
+            animate_path((player_x, player_y), prev_coords)
+        else:
+            return
+    elif keycode == 65364:
+        if not maze.grid[player_y][player_x].S:
+            prev_coords = ((player_x, player_y))
+            player_y += 1
+            animate_path((player_x, player_y), prev_coords)
+        else:
+            return
+    elif keycode == 65361:
+        if not maze.grid[player_y][player_x].W:
+            prev_coords = ((player_x, player_y))
+            player_x -= 1
+            animate_path((player_x, player_y), prev_coords)
+        else:
+            return
+    elif keycode == 65363:
+        if not maze.grid[player_y][player_x].E:
+            prev_coords = ((player_x, player_y))
+            player_x += 1
+            animate_path((player_x, player_y), prev_coords)
+        else:
+            return
 
 def animation_loop(_):
     animate_pattern(_)
-    animate_path(_)
     darw_pattern(_)
     return 0
 

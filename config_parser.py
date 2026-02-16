@@ -34,9 +34,12 @@ def get_config(file_path) -> dict:
                 if key in ["WIDTH", "HEIGHT"]:
                     try:
                         value = int(value)
-                        if value <= 0:
+                        if value <= 0 or value > 64:
                             raise ConfigSyntaxError
+    
                     except ConfigSyntaxError:
+                        if value > 64:
+                            raise ConfigValueError(f"Line {line_num}: Value for {key} should < 64")
                         raise ConfigValueError(f"Line {line_num}: Value for {key} should be a positive number")
                     except ValueError:
                         raise ConfigValueError(f"Line {line_num}: Value for {key} should be a valid number")
