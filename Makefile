@@ -7,7 +7,7 @@ MLX = /mlx/mlx.py
 install:
 	python3 -m venv $(VENV)
 	$(PYTHON) -m pip install --upgrade pip
-	$(PIP) install -r requirements
+	$(PIP) install -r ./utils/requirements
 
 run:
 	$(PYTHON) a_maze_ing.py config.txt
