@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from collections import deque
 import random
 
@@ -30,7 +30,7 @@ class MazeGenerator:
         self.output_file = output_file
         self.perfect = perfect
         self.grid = self._grid_generator()
-        self.path = None
+        self.path: List[Tuple[int, int]] = []
         self.seed = seed
 
     def _set_42(self, grid: List[List[Cell]]) -> None:
@@ -182,8 +182,10 @@ class MazeGenerator:
             valid = []
             for cell in inside:
                 x, y = cell
-                if (grid[y][x].visited is False
-                    and not grid[y][x].is_pattern):
+                if (
+                    grid[y][x].visited is False
+                    and not grid[y][x].is_pattern
+                ):
                     valid.append(cell)
             if len(valid) > 0:
                 chosen = random.choice(valid)
@@ -195,6 +197,40 @@ class MazeGenerator:
                 stack.pop()
         if not self.perfect:
             # print("here dyal imoerfect")
+            self._make_it_imperfect(grid)
+
+    def generate2(self) -> None:
+        """Executes the randomized Prim's algorithm
+        to carve the maze."""
+        self.grid = self._grid_generator()
+        if self.seed is not None:
+            random.seed(self.seed)
+        grid = self.grid
+        ex, ey = self.entry
+        grid[ey][ex].visited = True
+        neighbours = self._is_inside(self.entry)
+        frontier = set()
+        for x, y in neighbours:
+            if not grid[y][x].visited and not grid[y][x].is_pattern:
+                frontier.add((x, y))
+        while len(frontier) > 0:
+            visited = []
+            chosen = random.choice(list(frontier))
+            nx, ny = chosen
+            nbrs = self._is_inside(chosen)
+            for tx, ty in nbrs:
+                if grid[ty][tx].visited and not grid[ty][tx].is_pattern:
+                    visited.append((tx, ty))
+            v_neighbour = random.choice(visited)
+            self._wall_breaker(chosen, v_neighbour, grid)
+            grid[ny][nx].visited = True
+            for cord in nbrs:
+                tx, ty = cord
+                if not grid[ty][tx].visited and not grid[ty][tx].is_pattern:
+                    if (tx, ty) not in frontier:
+                        frontier.add((tx, ty))
+            frontier.remove(chosen)
+        if not self.perfect:
             self._make_it_imperfect(grid)
 
     def _reset(self, grid: List[List[Cell]]) -> None:
@@ -225,20 +261,18 @@ class MazeGenerator:
                 return True
         return (False)
 
-    def _maze_solver(self) -> List[tuple]:
+    def _maze_solver(self) -> List[Tuple[int, int]]:
         """Perform the Breadth-First Search algo to search for
         the shortest path from the entry point to the exit point"""
         grid = self.grid
         self._reset(grid)
         queue = deque([self.entry])
-        visited = set()
-        parents = {}
+        visited: set[Tuple[int, int]] = set()
+        parents: dict[Tuple[int, int], Tuple[int, int]] = {}
         visited.add(self.entry)
-        # found = False
         while len(queue) > 0:
             cx, cy = queue.popleft()
             if (cx, cy) == self.exit_p:
-                # found = True
                 break
             inside = self._is_inside((cx, cy))
             for coor in inside:
@@ -250,9 +284,8 @@ class MazeGenerator:
                         grid[ny][nx].visited = True
                         queue.append(coor)
                         parents[coor] = (cx, cy)
-        the_way = []
-        # if found:
-        start = self.exit_p
+        the_way: List[Tuple[int, int]] = []
+        start: Optional[Tuple[int, int]] = self.exit_p
         while start is not None:
             the_way.append(start)
             start = parents.get(start)

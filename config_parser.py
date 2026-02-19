@@ -1,18 +1,14 @@
 from typing import Dict, Tuple
-from errors import (ConfigValueError, ConfigSyntaxError,
-                    ConfigMissingKeyError, ConfigFileError)
+from utils.errors import (
+    ConfigValueError, ConfigSyntaxError,
+    ConfigMissingKeyError, ConfigFileError)
 
 
 class Config:
     def __init__(
-        self,
-        width: int,
-        height: int,
-        entry: Tuple[int, int],
-        exit: Tuple[int, int],
-        output_file: str,
-        perfect: bool,
-    ):
+            self, width: int, height: int, entry: Tuple[int, int],
+            exit: Tuple[int, int], output_file: str, perfect: bool):
+
         self.width = width
         self.height = height
         self.entry = entry
@@ -34,11 +30,13 @@ def get_config(file_name: str) -> Dict[str, str]:
                 if not line or line.startswith("#"):
                     continue
                 if "=" not in line:
-                    raise ConfigSyntaxError(f"Line {line_num}: Missing '=' in line")
-                
+                    raise ConfigSyntaxError(
+                        f"Line {line_num}: Missing '=' in line")
+
                 if line.count("=") != 1:
-                    raise ConfigSyntaxError(f"Line {line_num}: there is more than 1 '=' in line")
-                
+                    raise ConfigSyntaxError(
+                        f"Line {line_num}: there is more than 1 '=' in line")
+
                 key, value = line.split("=", 1)
                 key = key.strip().upper()
                 value = value.strip()
@@ -47,37 +45,45 @@ def get_config(file_name: str) -> Dict[str, str]:
                         int_value = int(value)
                     except ValueError:
                         raise ConfigValueError(
-                            f"Line {line_num}: Value for {key} should be a valid number"
+                            f"Line {line_num}: Value for "
+                            f"{key} should be a valid number"
                         )
                     if int_value <= 0 or int_value > 64:
                         if int_value > 64:
-                            raise ConfigValueError(f"Line {line_num}: Value for {key} should < 64")
+                            raise ConfigValueError(
+                                f"Line {line_num}: Value "
+                                f"for {key} should < 64")
                         raise ConfigValueError(
-                            f"Line {line_num}: Value for {key} should be a positive number"
+                            f"Line {line_num}: Value for "
+                            f"{key} should be a positive number"
                         )
                     value = str(int_value)
                 if key not in data:
                     data[key] = value
                 else:
-                    raise ConfigSyntaxError(f"Line {line_num}: {key} is duplicated in the file!")
-                
+                    raise ConfigSyntaxError(f"Line {line_num}: {key} "
+                                            f"is duplicated in the file!")
+
     except FileNotFoundError:
         raise ConfigFileError(f"Can't find {file_name} file!")
-    
+
     except PermissionError:
         raise ConfigFileError(f"Permission denied from {file_name}")
-    
-    except OSError:
-        raise ConfigFileError("Something went wrong at the OS level while opening the file")
-    
-    missing: set[str]
-    keys: set[str] = {"WIDTH", "HEIGHT", "ENTRY", "EXIT", "OUTPUT_FILE", "PERFECT"}
 
-    missing = keys - set(data.keys())     
+    except OSError:
+        raise ConfigFileError("Something went wrong at the OS level "
+                              "while opening the file")
+
+    missing: set[str]
+    keys: set[str] = {"WIDTH", "HEIGHT", "ENTRY", "EXIT",
+                      "OUTPUT_FILE", "PERFECT"}
+
+    missing = keys - set(data.keys())
     if missing:
         raise ConfigMissingKeyError(f"These configs are missing {missing}")
 
     return data
+
 
 def parse_coords(coord: str) -> Tuple[int, int]:
     x: int
@@ -92,8 +98,9 @@ def parse_coords(coord: str) -> Tuple[int, int]:
         y = int(y_str.strip())
     except ValueError:
         raise ConfigValueError("Invalid Coordinates")
-    
+
     return (x, y)
+
 
 def final_parse(file: str) -> Config:
 
@@ -105,25 +112,31 @@ def final_parse(file: str) -> Config:
     entry_ = parse_coords(data["ENTRY"])
     exit_ = parse_coords(data["EXIT"])
     if entry_[0] < 0 or entry_[0] >= width:
-        raise ConfigValueError(f"ENTRY x-coordinate out of bounds: x={entry_[0]} for WIDTH={width}")
+        raise ConfigValueError(f"ENTRY x-coordinate out of bounds: "
+                               f"x={entry_[0]} for WIDTH={width}")
     if entry_[1] < 0 or entry_[1] >= height:
-        raise ConfigValueError(f"ENTRY y-coordinate out of bounds: y={entry_[1]} for HEIGHT={height}")
-    
+        raise ConfigValueError(f"ENTRY y-coordinate out of bounds: "
+                               f"y={entry_[1]} for HEIGHT={height}")
+
     if exit_[0] < 0 or exit_[0] >= width:
-        raise ConfigValueError(f"EXIT x-coordinate out of bounds: x={exit_[0]} for WIDTH={width}")
+        raise ConfigValueError(f"EXIT x-coordinate out of bounds: "
+                               f"x={exit_[0]} for WIDTH={width}")
+
     if exit_[1] < 0 or exit_[1] >= height:
-        raise ConfigValueError(f"EXIT y-coordinate out of bounds: y={exit_[1]} for HEIGHT={height}")
-    
+        raise ConfigValueError(f"EXIT y-coordinate out of bounds: "
+                               f"y={exit_[1]} for HEIGHT={height}")
+
     if data["OUTPUT_FILE"] != "maze.txt":
         raise ConfigValueError("Output file should be named 'maze.txt'")
-    
+
     perfect_raw = data["PERFECT"].strip().lower()
     if perfect_raw in {"false", "0", "False", "FALSE"}:
         perfect = False
     elif perfect_raw in {"true", "1", "True", "TRUE"}:
         perfect = True
     else:
-        raise ConfigValueError("Value for PERFECT must be (true/false) or (0/1)")
+        raise ConfigValueError("Value for PERFECT must be "
+                               "(true/false) or (0/1)")
 
     return Config(
         width=width,
