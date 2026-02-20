@@ -1,5 +1,5 @@
 from typing import Dict, Tuple
-from utils.errors import (
+from parsing.errors import (
     ConfigValueError, ConfigSyntaxError,
     ConfigMissingKeyError, ConfigFileError)
 

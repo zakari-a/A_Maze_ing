@@ -1,14 +1,17 @@
 from mlx import Mlx
 from maze_generator.generator import MazeGenerator, Cell
 import random
-from typing import Any, List, Tuple, Set
-from utils.utils import write_to_file
+from typing import Any, List, Tuple
+from utils import write_to_file
+from rendering.render_helpers import neighbors_cells, pattern_coords
 
 
 def maze_animation(maze: MazeGenerator) -> None:
     """Animate the maze generation and solving process."""
     maze.generate()
+    maze.get_hex_grid()
     maze.solve()
+    # write_to_file(hex_list, path_directions, maze.entry, maze.exit_p)   
     CELL = 32
 
     # Initializing Mlx window
@@ -28,7 +31,7 @@ def maze_animation(maze: MazeGenerator) -> None:
     # Initializing 42 asset
     pattern_img_result: Tuple[Any, int, int] = mlx.mlx_xpm_file_to_image(
                                                 ctx,
-                                                "./utils/notgrey.xpm")
+                                                "./rendering/notgrey.xpm")
     pattern_img: Any = pattern_img_result[0]
     pattern_width: int = pattern_img_result[1]
     pattern_height: int = pattern_img_result[2]
@@ -61,55 +64,12 @@ def maze_animation(maze: MazeGenerator) -> None:
             for x in range(win_w):
                 put_pixel(x, y, color)
 
-    def in_bounds(x: int, y: int) -> bool:
-        """Check if the coordinates (x, y) are within the maze bounds."""
-        return True if 0 <= x < maze.width and 0 <= y < maze.height else False
-
-    def neighbors(x: int, y: int) -> List[Tuple[int, int]]:
-        """Get the neighboring cells of (x, y) that are within bounds."""
-        cells: List[Tuple[int, int]] = []
-        if in_bounds(x, y-1):
-            cells.append((x, y-1))
-        if in_bounds(x+1, y):
-            cells.append((x+1, y))
-        if in_bounds(x, y+1):
-            cells.append((x, y+1))
-        if in_bounds(x-1, y):
-            cells.append((x-1, y))
-        return cells
-
-    def neighbors_cells(x: int, y: int) -> List[List[Tuple[int, int]]]:
-        """
-        Get all cells in the maze grouped by their distance from the center.
-        """
-        visited: Set[Tuple[int, int]] = set()
-        # x: int = maze.width // 2
-        # y: int = maze.height // 2
-        visited.add((x, y))
-        cells: List[List[Tuple[int, int]]] = []
-        cells.append([(x, y)])
-        cells.append(neighbors(x, y))
-        for n in cells[1]:
-            visited.add(n)
-        i: int = 1
-        while cells[i] and i < len(cells):
-            cell: List[Tuple[int, int]] = []
-            for n in cells[i]:
-                neigh: List[Tuple[int, int]] = neighbors(n[0], n[1])
-                for k in neigh:
-                    if k not in visited:
-                        cell.append(k)
-                        visited.add(k)
-            cells.append(cell)
-            i += 1
-        return cells
-
     # Maze animation variables
     maze_index: int = 0
     maze_animating: bool = True
     cells: List[List[Tuple[int, int]]] = neighbors_cells(
-                                        maze.width // 2,
-                                        maze.height // 2)
+                                        maze.width // 2, maze.height // 2,
+                                        maze.width, maze.height)
 
     # 42 animation variables
     is_animating: bool = True
@@ -118,15 +78,15 @@ def maze_animation(maze: MazeGenerator) -> None:
     # Path animation variables
     is_animating_path: bool = False
     path_animation_index: int = 0
-    path_flag: bool = False
+    path_flag: bool = True
     show_path: bool = False
 
     # Exit animation variables
     exit_index: int = 0
     exit_animating: bool = True
     cells2: List[List[Tuple[int, int]]] = neighbors_cells(
-                                        maze.width - 1,
-                                        maze.height - 1)
+                                        maze.width - 1, maze.height - 1,
+                                        maze.width, maze.height)
 
     def animate_maze(_: None) -> int:
         """
@@ -191,6 +151,7 @@ def maze_animation(maze: MazeGenerator) -> None:
                     else:
                         put_pixel(ox + x, oy + y, 0xFF0000)
             mlx.mlx_put_image_to_window(ctx, win, img, 0, 0)
+
         return 0
 
     def animate_pattern(_: Any) -> int:
@@ -200,7 +161,7 @@ def maze_animation(maze: MazeGenerator) -> None:
         if not is_animating:
             return 0
 
-        patt: List[Tuple[int, int]] = pattern_coords(_)
+        patt: List[Tuple[int, int]] = pattern_coords(maze)
         for _ in range(1):
             if animation_index < len(patt):
                 x: int
@@ -288,24 +249,12 @@ def maze_animation(maze: MazeGenerator) -> None:
                 x: int
                 y: int
                 x, y = k
-                cell: Cell = maze.grid[y][x]
+                # cell: Cell = maze.grid[y][x]
                 x *= CELL
                 y *= CELL
-                n: int = 2
-                if cell.north:
-                    for i in range(n + 1):
-                        hline(x - n, x + CELL + n, y + i, 0x000000)
-                if cell.south:
-                    for i in range(n + 1):
-                        hline(x - n, x + CELL + n, y + CELL - i, 0x000000)
-
-                if cell.west:
-                    for i in range(n):
-                        vline(x + i, y - n, y + CELL, 0x000000)
-
-                if cell.east:
-                    for i in range(n + 1):
-                        vline(x + CELL - i, y - n, y + CELL, 0x000000)
+                for ny in range(CELL + 1):
+                    for nx in range(CELL + 1):
+                        put_pixel(nx + x, ny + y, 0x000000)
             mlx.mlx_put_image_to_window(ctx, win, img, 0, 0)
             exit_index += 1
         else:
@@ -329,17 +278,8 @@ def maze_animation(maze: MazeGenerator) -> None:
                     put_pixel(ox + x, oy + y, 0x000000)
             mlx.mlx_put_image_to_window(ctx, win, img, 0, 0)
             mlx.mlx_loop_exit(ctx)
+
         return 0
-
-    def pattern_coords(_: None) -> List[Tuple[int, int]]:
-        """Get the coordinates of Pattern 42 cells in the maze."""
-        patt: List[Tuple[int, int]] = []
-        for y in range(maze.height):
-            for x in range(maze.width):
-                if maze.grid[y][x].is_pattern:
-                    patt.append((x, y))
-
-        return patt
 
     def draw_pattern(_: None) -> None:
         """Draw the Pattern 42 in the maze."""
@@ -446,7 +386,7 @@ def maze_animation(maze: MazeGenerator) -> None:
 
     def on_key(keycode: int, _: None) -> None:
         """Handle key events for the maze animation."""
-        nonlocal saved, index
+        nonlocal saved, index, path_flag
         nonlocal maze_index, maze_animating
         nonlocal is_animating, animation_index, is_animating_path
 
@@ -479,11 +419,13 @@ def maze_animation(maze: MazeGenerator) -> None:
                 show_path = False
                 animation_index = 0
                 is_animating = True
+                path_flag = True
 
         elif keycode == 49:
 
             if is_animating_path or is_animating:
                 return
+
             maze.generate()
             maze.solve()
             hex_list = maze.get_hex_grid()
@@ -500,16 +442,17 @@ def maze_animation(maze: MazeGenerator) -> None:
             if is_animating_path:
                 return
 
-            nonlocal path_flag
             if path_flag:
                 draw_path(maze.path)
                 path_flag = False
+
             else:
                 data[:] = cleared_buffer
                 draw_maze(saved, maze, maze.path)
                 path_flag = True
                 animation_index = 0
                 is_animating = True
+                show_path = False
 
         elif keycode == 50:
             if is_animating_path or is_animating:

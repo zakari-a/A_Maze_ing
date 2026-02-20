@@ -1,6 +1,7 @@
 from typing import List, Optional, Tuple
 from collections import deque
 import random
+from parsing.errors import MazeError
 
 
 class Cell:
@@ -74,6 +75,7 @@ class MazeGenerator:
                   "Grid won't contain the 42 pattern")
             return (rows)
         self._set_42(rows)
+
         return (rows)
 
     def _cords_42(self) -> set[tuple]:
@@ -123,7 +125,7 @@ class MazeGenerator:
             count += 1
         if (grid[y][x].west):
             count += 1
-        if count >= 3:
+        if count >= 1:
             return True
         return False
 
@@ -170,6 +172,8 @@ class MazeGenerator:
         """Executes the randomized Depth-First Search
         algorithm to carve the maze."""
         self.grid = self._grid_generator()
+        self._grid_check()                       # here is the function
+
         if self.seed is not None:
             random.seed(self.seed)
         grid = self.grid
@@ -203,6 +207,7 @@ class MazeGenerator:
         """Executes the randomized Prim's algorithm
         to carve the maze."""
         self.grid = self._grid_generator()
+        self._grid_check()                          # here mis the function
         if self.seed is not None:
             random.seed(self.seed)
         grid = self.grid
@@ -333,3 +338,13 @@ class MazeGenerator:
                 tmp.append(format(count, 'X'))
             text.append(tmp)
         return (text)
+
+    def _grid_check(self) -> None:  # added this function to check
+        ex, ey = self.entry         # the 42 pettern
+        ox, oy = self.exit_p
+
+        if self.grid[ey][ex].is_pattern:
+            raise MazeError("Entry is inside '42' pattern")
+
+        if self.grid[oy][ox].is_pattern:
+            raise MazeError("Exit is inside '42' pattern")
