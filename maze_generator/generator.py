@@ -30,7 +30,7 @@ class MazeGenerator:
         self.exit_p = exit_p
         self.output_file = output_file
         self.perfect = perfect
-        self.grid = self._grid_generator()
+        self.grid: List[List[Cell]] = []   #edited
         self.path: List[Tuple[int, int]] = []
         self.seed = seed
 

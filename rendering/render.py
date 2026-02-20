@@ -8,10 +8,6 @@ from rendering.render_helpers import neighbors_cells, pattern_coords
 
 def maze_animation(maze: MazeGenerator) -> None:
     """Animate the maze generation and solving process."""
-    maze.generate()
-    maze.get_hex_grid()
-    maze.solve()
-    # write_to_file(hex_list, path_directions, maze.entry, maze.exit_p)   
     CELL = 32
 
     # Initializing Mlx window
@@ -20,7 +16,10 @@ def maze_animation(maze: MazeGenerator) -> None:
     ctx: Any = mlx.mlx_init()
     win_w: int = maze.width * CELL
     win_h: int = maze.height * CELL
-    win: Any = mlx.mlx_new_window(ctx, win_w, win_h + 40, "Maze")
+    if maze.width >= 25:
+        win: Any = mlx.mlx_new_window(ctx, win_w, win_h + 40, "Maze")
+    else:
+        win = mlx.mlx_new_window(ctx, win_w, win_h, "Maze")
 
     # Creating blanck image for the window
     img: Any = mlx.mlx_new_image(ctx, win_w, win_h)
@@ -391,9 +390,7 @@ def maze_animation(maze: MazeGenerator) -> None:
         nonlocal is_animating, animation_index, is_animating_path
 
         if keycode == 54:
-            # exit_animation(None)
             mlx.mlx_loop_hook(ctx, exit_animation, None)
-            # mlx.mlx_loop_exit(ctx)
 
         elif keycode == 53:
             if maze_animating:
@@ -422,7 +419,6 @@ def maze_animation(maze: MazeGenerator) -> None:
                 path_flag = True
 
         elif keycode == 49:
-
             if is_animating_path or is_animating:
                 return
 
