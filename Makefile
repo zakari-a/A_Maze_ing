@@ -20,3 +20,5 @@ lint:
 
 clean:
 	rm -rf venv __pycache__ */__pycache__ .mypy_cache */*.mypy_cache maze.txt
+
+ .PHONY: install run debug lint clean

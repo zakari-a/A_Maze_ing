@@ -11,8 +11,7 @@ def maze_animation(maze: MazeGenerator) -> None:
     CELL = 32
 
     # Initializing Mlx window
-    Mlxany: Any = Mlx
-    mlx: Any = Mlxany()
+    mlx: Any = Mlx()
     ctx: Any = mlx.mlx_init()
     win_w: int = maze.width * CELL
     win_h: int = maze.height * CELL
@@ -125,10 +124,6 @@ def maze_animation(maze: MazeGenerator) -> None:
             maze_index += 1
         else:
             maze_animating = False
-            ex: int
-            ey: int
-            ox: int
-            oy: int
             ex, ey = maze.path[0]
             ox, oy = maze.path[-1]
             ex *= CELL
@@ -163,8 +158,6 @@ def maze_animation(maze: MazeGenerator) -> None:
         patt: List[Tuple[int, int]] = pattern_coords(maze)
         for _ in range(1):
             if animation_index < len(patt):
-                x: int
-                y: int
                 x, y = patt[animation_index]
                 x *= CELL
                 y *= CELL
@@ -190,8 +183,6 @@ def maze_animation(maze: MazeGenerator) -> None:
         if not is_animating_path:
             return 0
         if path_animation_index < len(maze.path) - 2:
-            x1: int
-            y1: int
             x1, y1 = maze.path[path_animation_index + 1]
             px: int = x1 * CELL
             py: int = y1 * CELL
@@ -200,8 +191,6 @@ def maze_animation(maze: MazeGenerator) -> None:
                     put_pixel(px + dx, py + dy, 0xFFFFFF)
 
             if path_animation_index < len(maze.path):
-                x2: int
-                y2: int
                 x2, y2 = maze.path[path_animation_index]
                 c1_x: int = x1 * CELL + CELL // 2
                 c1_y: int = y1 * CELL + CELL // 2
@@ -245,10 +234,7 @@ def maze_animation(maze: MazeGenerator) -> None:
         if exit_index < len(cells2):
             c: List[Tuple[int, int]] = cells2[exit_index]
             for k in c:
-                x: int
-                y: int
                 x, y = k
-                # cell: Cell = maze.grid[y][x]
                 x *= CELL
                 y *= CELL
                 for ny in range(CELL + 1):
@@ -258,10 +244,6 @@ def maze_animation(maze: MazeGenerator) -> None:
             exit_index += 1
         else:
             exit_animating = False
-            ex: int
-            ey: int
-            ox: int
-            oy: int
             ex, ey = maze.path[0]
             ox, oy = maze.path[-1]
             ex *= CELL
@@ -297,11 +279,6 @@ def maze_animation(maze: MazeGenerator) -> None:
     def draw_maze(wall_color: int, maze: MazeGenerator,
                   path: List[Tuple[int, int]]) -> None:
         """Draw the maze with walls and entry/exit points."""
-        ex: int
-        ey: int
-        ox: int
-        oy: int
-
         ex, ey = path[0]
         ox, oy = path[-1]
         ex *= CELL

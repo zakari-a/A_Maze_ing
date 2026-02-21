@@ -129,11 +129,16 @@ def final_parse(file: str) -> Config:
     if data["OUTPUT_FILE"] != "maze.txt":
         raise ConfigValueError("Output file should be named 'maze.txt'")
 
+    if exit_ == entry_:
+        raise ConfigValueError("Entry and Exit should have different coords")
+
     perfect_raw = data["PERFECT"].strip().lower()
     if perfect_raw in {"false", "0", "False", "FALSE"}:
         perfect = False
+
     elif perfect_raw in {"true", "1", "True", "TRUE"}:
         perfect = True
+
     else:
         raise ConfigValueError("Value for PERFECT must be "
                                "(true/false) or (0/1)")

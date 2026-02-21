@@ -30,7 +30,7 @@ class MazeGenerator:
         self.exit_p = exit_p
         self.output_file = output_file
         self.perfect = perfect
-        self.grid: List[List[Cell]] = []   #edited
+        self.grid: List[List[Cell]] = []   # edited
         self.path: List[Tuple[int, int]] = []
         self.seed = seed
 
@@ -152,7 +152,7 @@ class MazeGenerator:
         have more than one valid path"""
         height = self.height
         width = self.width
-        count = int(0.08 * width * height)
+        count = int(0.15 * width * height)
         unauthorized = self._cords_42()
         for _ in range(count):
             x = random.randint(1, width - 2)

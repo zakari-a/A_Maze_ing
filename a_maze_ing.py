@@ -11,7 +11,11 @@ def main() -> None:
     if len(sys.argv) > 1:
         filename = sys.argv[1]
         if os.path.exists(filename):
-            data = final_parse(filename)
+            try:
+                data = final_parse(filename)
+            except MazeError as e:
+                print(e)
+                sys.exit(1)
         else:
             print(f"Error: I can't find the file '{filename}'."
                   "Check your spelling!")
