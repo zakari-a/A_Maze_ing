@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mazegen"
+version = "1.0.0"
+description = "A maze generator that generates a random maze"
+authors = [
+    {name = "ylamaoui"},
+    {name = "zael-has"}
+]
+requires-python = '>=3.10'
+
+[project.scripts]
+A_Maze_ing = "a_maze_ing:main"
+
+[tool.setuptools]
+packages = ["maze_generator", "parsing", "rendering", "utils"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+"rendering" = ["notgrey.xpm"]

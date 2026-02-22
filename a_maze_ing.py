@@ -4,7 +4,7 @@ from parsing.errors import MazeError
 from parsing.config_parser import final_parse
 from maze_generator.generator import MazeGenerator
 from rendering.render import maze_animation
-from utils import write_to_file
+from utils.utils import write_to_file
 
 
 def main() -> None:

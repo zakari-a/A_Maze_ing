@@ -2,8 +2,9 @@ from mlx import Mlx
 from maze_generator.generator import MazeGenerator, Cell
 import random
 from typing import Any, List, Tuple
-from utils import write_to_file
+from utils.utils import write_to_file
 from rendering.render_helpers import neighbors_cells, pattern_coords
+import sys
 
 
 def maze_animation(maze: MazeGenerator) -> None:
@@ -29,8 +30,12 @@ def maze_animation(maze: MazeGenerator) -> None:
     # Initializing 42 asset
     pattern_img_result: Tuple[Any, int, int] = mlx.mlx_xpm_file_to_image(
                                                 ctx,
-                                                "./rendering/notgrey.xpm")
+                                                "notgrey.xpm")
     pattern_img: Any = pattern_img_result[0]
+    if pattern_img is None:
+        print("Cant't find 'notgrey.xpm' image")
+        sys.exit(1)
+
     pattern_width: int = pattern_img_result[1]
     pattern_height: int = pattern_img_result[2]
 
@@ -226,6 +231,7 @@ def maze_animation(maze: MazeGenerator) -> None:
         return 0
 
     def exit_animation(_: None) -> int:
+        """Animate the exit by drawing it step by step."""
         nonlocal exit_index, exit_animating
 
         if not exit_animating:
