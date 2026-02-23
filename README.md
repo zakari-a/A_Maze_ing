@@ -24,6 +24,8 @@ To run the project, a Makefile is provided with the following rules:
     and compliance with style guidelines.
 -   make debug
     Launches the program in debug mode using pdb.
+-   make build
+    Compiles the project (if necessary) and prepares it for execution.
 
 ## Configuration File Description
 
@@ -104,10 +106,33 @@ Visualization is separated from maze logic to maintain modularity and reusabilit
 - **Mypy**: For static type checking.
 - **PDB**: For debugging the maze generation and solving logic.
 
+### Python Packaging & Installation
+This project is structured as a compliant Python package named mazegen-*. It includes all necessary metadata to be built, installed, and executed as a standalone command-line tool.
+    1. Build Requirements
+        -To build the package from source, you need a Python environment with the build module installed:
+        -`Create and activate a virtual environment`
+        python3 -m venv venv
+        source venv/bin/activate
+        -`Install the standard build tool`
+        pip install --upgrade pip
+        pip install build
+    2. Building the Module
+        -From the root of the repository (where pyproject.toml is located), run:
+        ---> python3 -m build
+        -This command generates two files in the dist/ directory:
+            + A source distribution (.tar.gz)
+            + A built wheel (.whl)
+    3. Installation
+        -You can install the module directly using the generated wheel file:
+            + pip install mazegen-1.0.0-py3-none-any.whl
+
 ## RESOURCES
 
     - **MinilibX Docs:** https://harm-smits.github.io/42docs/libs/minilibx
     - **Oceano's Youtube Channel:** Introduction to the minilibX - a simple X-Windo programming API
+    - https://en.wikipedia.org/wiki/Maze_generation_algorithm
+    - https://en.wikipedia.org/wiki/Breadth-first_search
+
 
 ## AI USAGE
 

@@ -1,10 +1,17 @@
-from mlx import Mlx
 from maze_generator.generator import MazeGenerator, Cell
 import random
 from typing import Any, List, Tuple
 from utils.utils import write_to_file
 from rendering.render_helpers import neighbors_cells, pattern_coords
 import sys
+
+
+try:
+    from mlx import Mlx
+except Exception:
+    print("Error can't the find the MLX module try using "
+          "make install")
+    sys.exit(1)
 
 
 def maze_animation(maze: MazeGenerator) -> None:
@@ -86,7 +93,7 @@ def maze_animation(maze: MazeGenerator) -> None:
 
     # Exit animation variables
     exit_index: int = 0
-    exit_animating: bool = True
+    exit_animating: bool = False
     cells2: List[List[Tuple[int, int]]] = neighbors_cells(
                                         maze.width - 1, maze.height - 1,
                                         maze.width, maze.height)
@@ -369,14 +376,17 @@ def maze_animation(maze: MazeGenerator) -> None:
     def on_key(keycode: int, _: None) -> None:
         """Handle key events for the maze animation."""
         nonlocal saved, index, path_flag
-        nonlocal maze_index, maze_animating
+        nonlocal maze_index, maze_animating, exit_animating
         nonlocal is_animating, animation_index, is_animating_path
 
         if keycode == 54:
+            if is_animating:
+                return
+            exit_animating = True
             mlx.mlx_loop_hook(ctx, exit_animation, None)
 
         elif keycode == 53:
-            if maze_animating:
+            if maze_animating or exit_animating:
                 return
             saved = colors[index % len(colors)]
             draw_maze(saved, maze, maze.path)
@@ -386,7 +396,7 @@ def maze_animation(maze: MazeGenerator) -> None:
 
         elif keycode == 52:
             nonlocal show_path, is_animating_path, path_animation_index
-            if is_animating_path or is_animating:
+            if is_animating_path or is_animating or exit_animating:
                 return
 
             if not show_path:
@@ -402,7 +412,7 @@ def maze_animation(maze: MazeGenerator) -> None:
                 path_flag = True
 
         elif keycode == 49:
-            if is_animating_path or is_animating:
+            if is_animating_path or is_animating or exit_animating:
                 return
 
             maze.generate()
@@ -418,7 +428,7 @@ def maze_animation(maze: MazeGenerator) -> None:
             is_animating = True
 
         elif keycode == 51:
-            if is_animating_path:
+            if is_animating_path or exit_animating:
                 return
 
             if path_flag:
@@ -434,7 +444,7 @@ def maze_animation(maze: MazeGenerator) -> None:
                 show_path = False
 
         elif keycode == 50:
-            if is_animating_path or is_animating:
+            if is_animating_path or is_animating or exit_animating:
                 return
 
             maze.generate2()

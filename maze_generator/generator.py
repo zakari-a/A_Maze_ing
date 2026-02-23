@@ -30,7 +30,7 @@ class MazeGenerator:
         self.exit_p = exit_p
         self.output_file = output_file
         self.perfect = perfect
-        self.grid: List[List[Cell]] = []   # edited
+        self.grid: List[List[Cell]] = []
         self.path: List[Tuple[int, int]] = []
         self.seed = seed
 
@@ -152,7 +152,7 @@ class MazeGenerator:
         have more than one valid path"""
         height = self.height
         width = self.width
-        count = int(0.15 * width * height)
+        count = int(0.13 * width * height)
         unauthorized = self._cords_42()
         for _ in range(count):
             x = random.randint(1, width - 2)
@@ -172,7 +172,7 @@ class MazeGenerator:
         """Executes the randomized Depth-First Search
         algorithm to carve the maze."""
         self.grid = self._grid_generator()
-        self._grid_check()                       # here is the function
+        self._grid_check()
 
         if self.seed is not None:
             random.seed(self.seed)
@@ -200,14 +200,13 @@ class MazeGenerator:
             else:
                 stack.pop()
         if not self.perfect:
-            # print("here dyal imoerfect")
             self._make_it_imperfect(grid)
 
     def generate2(self) -> None:
         """Executes the randomized Prim's algorithm
         to carve the maze."""
         self.grid = self._grid_generator()
-        self._grid_check()                          # here mis the function
+        self._grid_check()
         if self.seed is not None:
             random.seed(self.seed)
         grid = self.grid
@@ -301,7 +300,6 @@ class MazeGenerator:
         cardinal directions (N, S, E, W)."""
         path = self._maze_solver()
         self.path = path
-        # print(path)
         directions = []
         for i in range(len(path) - 1):
             nx, ny = path[i + 1]
@@ -314,7 +312,6 @@ class MazeGenerator:
                 directions.append("E")
             elif nx < cx:
                 directions.append("W")
-        # print(directions)
         return (directions)
 
     def get_hex_grid(self) -> List[List[str]]:
@@ -327,7 +324,6 @@ class MazeGenerator:
             for cor in row:
                 count = 0
                 if cor.north:
-                    # print("cords->", cor.north)
                     count += 1
                 if cor.east:
                     count += 2
@@ -339,8 +335,8 @@ class MazeGenerator:
             text.append(tmp)
         return (text)
 
-    def _grid_check(self) -> None:  # added this function to check
-        ex, ey = self.entry         # the 42 pettern
+    def _grid_check(self) -> None:
+        ex, ey = self.entry
         ox, oy = self.exit_p
 
         if self.grid[ey][ex].is_pattern:

@@ -8,6 +8,7 @@ from utils.utils import write_to_file
 
 
 def main() -> None:
+    """Main function to run the maze generation and animation."""
     if len(sys.argv) > 1:
         filename = sys.argv[1]
         if os.path.exists(filename):

@@ -14,6 +14,7 @@ run:
 
 build:
 	$(PYTHON) -m build
+	mv dist/mazegen-1.0.0-py3-none-any.whl .
 
 debug:
 	$(PYTHON) -m pdb a_maze_ing.py config.txt
@@ -25,4 +26,4 @@ lint:
 clean:
 	rm -rf venv __pycache__ */__pycache__ .mypy_cache */*.mypy_cache maze.txt mazegen.egg-info dist
 
- .PHONY: install run debug lint clean 
+ .PHONY: install run debug lint clean build

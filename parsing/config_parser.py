@@ -5,10 +5,11 @@ from parsing.errors import (
 
 
 class Config:
+    """A class to hold the configuration data for the maze generator."""
     def __init__(
             self, width: int, height: int, entry: Tuple[int, int],
             exit: Tuple[int, int], output_file: str, perfect: bool):
-
+        """Initialize the Config object with the provided parameters."""
         self.width = width
         self.height = height
         self.entry = entry
@@ -18,6 +19,10 @@ class Config:
 
 
 def get_config(file_name: str) -> Dict[str, str]:
+    """
+    Reads the configuration file and returns
+    a dictionary of key-value pairs.
+    """
     data: Dict[str, str] = {}
 
     try:
@@ -86,6 +91,10 @@ def get_config(file_name: str) -> Dict[str, str]:
 
 
 def parse_coords(coord: str) -> Tuple[int, int]:
+    """
+    Parse a coordinate string in the format 'x,y'
+    and return a tuple (x, y).
+    """
     x: int
     y: int
 
@@ -103,7 +112,7 @@ def parse_coords(coord: str) -> Tuple[int, int]:
 
 
 def final_parse(file: str) -> Config:
-
+    """Performs the final parsing of the configuration file."""
     data = get_config(file)
 
     width = int(data["WIDTH"])
